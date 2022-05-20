@@ -1,0 +1,63 @@
+---
+title: "03.29.22 tidytuesday"
+author: "Kayla Hendrickson"
+date: "03-29-2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# load packages
+  library(tidyverse)
+  library(tidytuesdayR) 
+  library(viridis)
+
+#load data 
+tuesdata <- tidytuesdayR::tt_load('2022-03-29')
+sports <- tuesdata$sports
+```
+
+```{r}
+#filter down to north carolina schools
+nc_sports <- sports %>%
+  filter(state_cd == "NC")
+
+#filter to only private schools
+nc_private <- nc_sports %>%
+  filter(sector_name == "Private nonprofit, 4-year or above")%>%
+  select(year, institution_name, ef_male_count, ef_female_count, ef_total_count, partic_men, partic_women, sum_partic_men, sum_partic_women, rev_men, rev_women, total_rev_menwomen, exp_men, exp_women, total_exp_menwomen, sports)%>%
+  drop_na()
+
+#filter to only public schools
+nc_public <- nc_sports %>%
+  filter(sector_name == "Public, 4-year or above")%>%
+  select(year, institution_name, ef_male_count, ef_female_count, ef_total_count, partic_men, partic_women, sum_partic_men, sum_partic_women, rev_men, rev_women, total_rev_menwomen, exp_men, exp_women, total_exp_menwomen, sports)%>%
+  drop_na()
+```
+
+I want to know if public or private schools have the same or different sports gender equality when it comes to participation, spending, and revenue. 
+
+# Participation
+```{r}
+nc_private <- nc_private %>%
+  group_by(year)%>%
+  #calculate the percentage of men participating in sports by year
+  mutate(perc_part_men = sum_partic_men/ef_male_count, 
+         perc_part_women = sum_partic_women/ef_female_count)
+
+nc_public <- nc_public %>%
+  group_by(year)%>%
+  #calculate the percentage of men participating in sports by year
+  mutate(perc_part_men = sum_partic_men/ef_male_count, 
+         perc_part_women = sum_partic_women/ef_female_count)
+```
+
+```{r}
+ggplot(nc_private, aes(x = year, perc_part_men))+
+  geom_line()
+```
+
+
+
